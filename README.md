@@ -84,4 +84,47 @@ This repository provides pratical instructions how to implement this specificati
 
   ```
   docker kill 52n-label-test && docker rm 52n-label-test
+
+  
   ```
+* **Start container using a label file**
+
+Instead of specifying multiple `--label` flags on the command line, you can define your labels in a file and use Docker’s `--label-file` option. This approach can improve readability and maintainability, especially when dealing with many labels.
+
+ Create a `labels.txt` file containing your labels:
+
+Create a file named `labels.txt` with the following content:
+
+```
+org.52north.contact=e.h.juerrens+52n-label-test-on-$(hostname -f)@52north.org
+org.52north.context=local testing
+org.52north.end-of-life=$(date -d '+1 hour' -u +"%Y-%m-%dT%H:%M:%SZ")
+```
+
+ Start the container using the label file:
+
+Run the following command to start the container and apply the labels from the file:
+
+```bash
+docker run \
+  --detach \
+  --name 52n-label-test \
+  --label-file ./labels.txt \
+  52n-label-test:latest
+```
+
+ Inspect the container labels:
+
+You can inspect the labels using `jq` for a readable output:
+
+```bash
+docker inspect 52n-label-test | jq -r '.[0].Config.Labels'
+```
+
+ Cleanup:
+
+After testing, stop and remove the container:
+
+```bash
+docker kill 52n-label-test && docker rm 52n-label-test
+```
