@@ -174,13 +174,13 @@ When finished, stop and remove the services and containers with:
 docker-compose down
 ```
 
-# Kubernetes: Labels and Selectors
+* **Kubernetes: Labels and Selectors**
 
-## Introduction to Labels and Selectors
+Introduction to Labels and Selectors
 
 In Kubernetes, labels are key-value pairs attached to objects such as pods, services, and deployments. They are used to organize, select, and manage resources efficiently. Selectors enable users to filter and query resources based on their labels, facilitating operations like grouping pods for services or deployments.
 
-## Syntax Examples
+Syntax Examples
 
 Labels are defined as key-value pairs in YAML manifests. Keys and values must be strings.
 
@@ -205,7 +205,7 @@ selector:
     environment: production
 ```
 
-## Pod and Service Example
+Pod and Service Example
 
 A pod with labels:
 
@@ -240,7 +240,7 @@ spec:
     targetPort: 80
 ```
 
-## Deployment Example with matchLabels and matchExpressions
+Deployment Example with matchLabels and matchExpressions
 
 A deployment specifying pod template labels and selector:
 
@@ -273,7 +273,7 @@ spec:
         image: backend-image:v1
 ```
 
-## Common kubectl Commands with Label Selectors
+Common kubectl Commands with Label Selectors
 
 - List pods with a specific label:
 
