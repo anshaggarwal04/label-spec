@@ -85,7 +85,7 @@ This repository provides pratical instructions how to implement this specificati
   ```
   docker kill 52n-label-test && docker rm 52n-label-test
 
-  
+
   ```
 * **Start container using a label file**
 
@@ -128,3 +128,173 @@ After testing, stop and remove the container:
 ```bash
 docker kill 52n-label-test && docker rm 52n-label-test
 ```
+
+
+* **Using Docker Compose**
+
+Docker Compose can be used to simplify container management and streamline the process of applying labels to containers. By defining services and their labels in a `docker-compose.yml` file, you can easily build, run, and manage containers with consistent configurations.
+
+Below is an example `docker-compose.yml` file for a service named `label-test` using the same labels as in the previous examples:
+
+```yaml
+version: '3.8'
+
+services:
+  label-test:
+    image: 52n-label-test:latest
+    container_name: 52n-label-test
+    labels:
+      org.52north.contact: "e.h.juerrens+52n-label-test-on-${HOSTNAME}@52north.org"
+      org.52north.context: "local testing"
+      org.52north.end-of-life: "${END_OF_LIFE}"
+    restart: unless-stopped
+```
+
+Before running the Compose file, you can export the `END_OF_LIFE` environment variable to set the label dynamically, for example:
+
+```bash
+export END_OF_LIFE=$(date -d '+1 hour' -u +"%Y-%m-%dT%H:%M:%SZ")
+```
+
+To build and run the service in detached mode, use the following command:
+
+```bash
+docker-compose up -d
+```
+
+To verify the labels applied to the running container, you can use:
+
+```bash
+docker inspect 52n-label-test | jq -r '.[0].Config.Labels'
+```
+
+When finished, stop and remove the services and containers with:
+
+```bash
+docker-compose down
+```
+
+# Kubernetes: Labels and Selectors
+
+## Introduction to Labels and Selectors
+
+In Kubernetes, labels are key-value pairs attached to objects such as pods, services, and deployments. They are used to organize, select, and manage resources efficiently. Selectors enable users to filter and query resources based on their labels, facilitating operations like grouping pods for services or deployments.
+
+## Syntax Examples
+
+Labels are defined as key-value pairs in YAML manifests. Keys and values must be strings.
+
+Example label definitions:
+
+```yaml
+metadata:
+  labels:
+    app: frontend
+    environment: production
+    tier: backend
+```
+
+Selectors use label keys and values to filter resources. The most common selector is `matchLabels`, which matches resources with specific label key-value pairs.
+
+Example selector:
+
+```yaml
+selector:
+  matchLabels:
+    app: frontend
+    environment: production
+```
+
+## Pod and Service Example
+
+A pod with labels:
+
+```yaml
+apiVersion: v1
+kind: Pod
+metadata:
+  name: frontend-pod
+  labels:
+    app: frontend
+    environment: production
+spec:
+  containers:
+  - name: frontend
+    image: nginx
+```
+
+A service selecting pods with matching labels:
+
+```yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: frontend-service
+spec:
+  selector:
+    app: frontend
+    environment: production
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 80
+```
+
+## Deployment Example with matchLabels and matchExpressions
+
+A deployment specifying pod template labels and selector:
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: backend
+      tier: api
+    matchExpressions:
+    - key: environment
+      operator: In
+      values:
+      - production
+      - staging
+  template:
+    metadata:
+      labels:
+        app: backend
+        tier: api
+        environment: production
+    spec:
+      containers:
+      - name: backend
+        image: backend-image:v1
+```
+
+## Common kubectl Commands with Label Selectors
+
+- List pods with a specific label:
+
+  ```
+  kubectl get pods -l app=frontend
+  ```
+
+- List pods matching multiple labels:
+
+  ```
+  kubectl get pods -l app=frontend,environment=production
+  ```
+
+- Delete pods with a specific label:
+
+  ```
+  kubectl delete pods -l tier=backend
+  ```
+
+- Get services selecting pods with a label:
+
+  ```
+  kubectl get svc -l app=frontend
+  ```
